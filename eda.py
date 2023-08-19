@@ -13,11 +13,20 @@ def concat_csv_from_directory(directory: Union[str, Path]) -> pd.DataFrame:
     Returns:
         pd.DataFrame: A concateated dataframe of all CSV files in the directory
     """
+    
+    # List of columns to be read
+    columns = [
+        "CRN", "INJURY_COUNT", "FATAL_COUNT", "MCYCLE_DEATH_COUNT", "BICYCLE_DEATH_COUNT",
+        "PED_DEATH_COUNT", "CRASH_MONTH", "CRASH_YEAR",
+        "DEC_LAT", "DEC_LONG"
+    ]
+    
+
     path = Path(directory)
     csv_files = [f for f in path.glob('CRASH*.csv')]
     
     # Using list comprehension to read the CSV files into dataframes
-    list_of_dataframes = [pd.read_csv(filename) for filename in csv_files]
+    list_of_dataframes = [pd.read_csv(filename, usecols=columns) for filename in csv_files]
     
     concatenated_dataframe = pd.concat(list_of_dataframes, ignore_index=True)
     
@@ -84,28 +93,3 @@ def plot_object_columns(df: pd.DataFrame) -> None:
     for col in filtered_columns:
         fig = px.histogram(df, x=col, title=f"Countplot for {col}")
         fig.show()
-
-def get_outliers(df):
-    '''Identify the number of outliers +/- 3 standard deviations. 
-    Pass this function a dataframe and it returns a dictionary'''
-
-    outs = {}
-
-    df = df.select_dtypes(include=['int64'])
-
-
-    for col in df.columns:
-
-        # calculate summary statistics
-        data_mean, data_std = np.mean(df[col]), np.std(df[col])
-
-        # identify outliers
-        cut_off = data_std * 3
-        lower, upper = data_mean - cut_off, data_mean + cut_off
-
-        # identify outliers
-        outliers = [x for x in df[col] if x < lower or x > upper]
-
-        outs[col] = len(outliers)
-
-    return outs
