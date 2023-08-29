@@ -2,5 +2,7 @@ crash_venv/
 crash_venv
 data
 eda_notebook.ipynb
+.env
+
 
 

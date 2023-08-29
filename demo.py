@@ -1,5 +1,11 @@
 import pydeck as pdk
 import pandas as pd
+import os
+from dotenv import load_dotenv
+
+load_dotenv() 
+
+map_box_api_key = os.environ.get("phila_crash_map_api_key")
 
 def render_map(df, mode='3d', zoom=9, filename='demo.html'):
     # 1. Color Scheme 
@@ -50,7 +56,7 @@ def render_map(df, mode='3d', zoom=9, filename='demo.html'):
         extruded=True,
         coverage=1,
         radius=500,
-        opacity=0.8,
+        opacity=0.4,
         color_range=color_scheme,
         material={"ambientColor": [255, 255, 255], "shininess": 50, "lightSettings": lighting_effects}
     )
@@ -79,7 +85,9 @@ def render_map(df, mode='3d', zoom=9, filename='demo.html'):
     r = pdk.Deck(
         layers=[layer],
         initial_view_state=view_state,
-        map_style=pdk.map_styles.DARK,
+        map_provider='mapbox',
+        map_style='mapbox://styles/mapbox/dark-v10',
+        api_keys={'mapbox': map_box_api_key},
         tooltip=tooltip
     )
 
