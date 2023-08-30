@@ -57,7 +57,7 @@ def render_map(df, mode='3d', zoom=9, filename='demo.html'):
         extruded=True,
         coverage=1,
         radius=500,
-        opacity=0.4,
+        opacity=0.7,
         color_range=color_scheme,
         material={"ambientColor": [255, 255, 255], "shininess": 50, "lightSettings": lighting_effects}
     )
@@ -104,6 +104,34 @@ def main():
     st.title("Philadelphia Crash Map")
     
     df = pd.read_csv('data\PROCESSED_DATA\crash_data.csv')
+    
+    # Add a selectbox (dropdown) for users to select a data filter
+    filter_option = st.selectbox(
+        'Filter Data By:',
+        (
+            'Total Collisions',
+            'Total Injured',
+            'Total Fatalities',
+            'Motorcycle Fatalities',
+            'Pedestrian Fatalities'
+        )
+    )
+    
+    if filter_option == 'Total Collisions':
+        df = df.loc[(df['CRN'] > 0)]
+        
+    elif filter_option == 'Total Injured':
+        df = df.loc[(df['INJURY_COUNT'] > 0)]
+        
+    elif filter_option == 'Total Fatalities':
+        df = df.loc[(df['FATAL_COUNT'] > 0)]
+        
+    elif filter_option == 'Motorcycle Fatalities':
+        df = df.loc[(df['MCYCLE_DEATH_COUNT'] > 0)]
+        
+    elif filter_option == 'Pedestrian Fatalities':
+        df = df.loc[(df['PED_DEATH_COUNT'] > 0)]
+    
     df = df.dropna(subset=['DEC_LONG', 'DEC_LAT']) 
     
     map_deck = render_map(df, mode='2d', zoom=9.75)
