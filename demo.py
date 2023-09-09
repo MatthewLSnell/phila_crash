@@ -9,7 +9,7 @@ load_dotenv()
 
 map_box_api_key = os.environ.get("phila_crash_map_api_key")
 
-def render_map(df, mode='3d', zoom=9, tooltip_field='', tooltip_title='', filename='demo.html'):
+def render_map(df, mode='3D', zoom=9, tooltip_title='', filename='demo.html'):
     # 1. Color Scheme 
     color_scheme = [
     [0, 0, 4, 223],
@@ -44,8 +44,8 @@ def render_map(df, mode='3d', zoom=9, tooltip_field='', tooltip_title='', filena
     
     
     # Determine elevation range based on mode 
-    elevation_range = [0, 150] if mode == '3d' else [0, 0]
-    pitch_value = 40.5 if mode == '3d' else 10
+    elevation_range = [0, 150] if mode == '3D' else [0, 0]
+    pitch_value = 40.5 if mode == '3D' else 10
 
     # Define a layer to display on a map
     layer = pdk.Layer(
@@ -58,8 +58,8 @@ def render_map(df, mode='3d', zoom=9, tooltip_field='', tooltip_title='', filena
         elevation_range=elevation_range,
         extruded=True,
         coverage=1,
-        radius=500,
-        opacity=0.7,
+        radius=300,
+        opacity=0.4,
         color_range=color_scheme,
         material={"ambientColor": [255, 255, 255], "shininess": 50, "lightSettings": lighting_effects}
     )
@@ -77,7 +77,7 @@ def render_map(df, mode='3d', zoom=9, tooltip_field='', tooltip_title='', filena
 
     # Tooltip
     tooltip = {
-        "html": "<b>Elevation Value :</b> {elevationValue}",
+        "html": f"<b>{tooltip_title} :</b> {{elevationValue}}",
         "style": {
             "backgroundColor": "steelblue",
             "color": "white"
@@ -114,8 +114,16 @@ def main():
         )
     )
     
-    tooltip_field = ''
-    tooltip_title = ''
+    # Add mappings for tooltip_title based on filter_option
+    tooltip_titles = {
+        'Total Collisions': 'Total Collisions',
+        'Total Injured': 'Total Injured',
+        'Total Fatalities': 'Total Fatalities',
+        'Motorcycle Fatalities': 'Motorcycle Fatalities',
+        'Pedestrian Fatalities': 'Pedestrian Fatalities'
+    }
+    
+    tooltip_title = tooltip_titles[filter_option] 
     
     if filter_option == 'Total Collisions':
         df = df.loc[(df['CRN'] > 0)]
@@ -134,9 +142,9 @@ def main():
     
     df = df.dropna(subset=['DEC_LONG', 'DEC_LAT']) 
     
-    mode_option = st.selectbox('Select Mode:', ('2d', '3d'))
+    mode_option = st.selectbox('Select Mode:', ('2D', '3D'))
     
-    map_deck = render_map(df, mode=mode_option, zoom=9.75, tooltip_field=tooltip_field, tooltip_title=tooltip_title)
+    map_deck = render_map(df, mode=mode_option, zoom=9.75, tooltip_title=tooltip_title)
     
     st.pydeck_chart(map_deck)
     
