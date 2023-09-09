@@ -1,3 +1,4 @@
+from json import tool
 import pydeck as pdk
 import pandas as pd
 import os
@@ -8,7 +9,7 @@ load_dotenv()
 
 map_box_api_key = os.environ.get("phila_crash_map_api_key")
 
-def render_map(df, mode='3d', zoom=9, filename='demo.html'):
+def render_map(df, mode='3d', zoom=9, tooltip_field='', tooltip_title='', filename='demo.html'):
     # 1. Color Scheme 
     color_scheme = [
     [0, 0, 4, 223],
@@ -40,6 +41,7 @@ def render_map(df, mode='3d', zoom=9, filename='demo.html'):
             }
         ]
     }
+    
     
     # Determine elevation range based on mode 
     elevation_range = [0, 150] if mode == '3d' else [0, 0]
@@ -81,6 +83,7 @@ def render_map(df, mode='3d', zoom=9, filename='demo.html'):
             "color": "white"
         }
     }
+    
 
     # Render
     r = pdk.Deck(
@@ -111,6 +114,9 @@ def main():
         )
     )
     
+    tooltip_field = ''
+    tooltip_title = ''
+    
     if filter_option == 'Total Collisions':
         df = df.loc[(df['CRN'] > 0)]
         
@@ -130,7 +136,7 @@ def main():
     
     mode_option = st.selectbox('Select Mode:', ('2d', '3d'))
     
-    map_deck = render_map(df, mode=mode_option, zoom=9.75)
+    map_deck = render_map(df, mode=mode_option, zoom=9.75, tooltip_field=tooltip_field, tooltip_title=tooltip_title)
     
     st.pydeck_chart(map_deck)
     
