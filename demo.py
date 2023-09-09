@@ -93,12 +93,6 @@ def render_map(df, mode='3d', zoom=9, filename='demo.html'):
     )
 
     return r
-    # return r.to_html(filename)
-
-# if __name__ == '__main__':
-#     df = pd.read_csv('data\PROCESSED_DATA\crash_data.csv')
-#     df = df.loc[(df['CRN'] > 0)]
-#     render_map(df, mode='2d', zoom=9.75)
 
 def main():
     st.title("Philadelphia Crash Map")
@@ -134,7 +128,9 @@ def main():
     
     df = df.dropna(subset=['DEC_LONG', 'DEC_LAT']) 
     
-    map_deck = render_map(df, mode='2d', zoom=9.75)
+    mode_option = st.selectbox('Select Mode:', ('2d', '3d'))
+    
+    map_deck = render_map(df, mode=mode_option, zoom=9.75)
     
     st.pydeck_chart(map_deck)
     
