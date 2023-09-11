@@ -2,8 +2,10 @@ from json import tool
 import pydeck as pdk
 import pandas as pd
 import os
+import numpy as np
 from dotenv import load_dotenv
 import streamlit as st 
+import jinja2
 
 # Set the page to wide format
 st.set_page_config(layout="wide")
@@ -11,6 +13,85 @@ st.set_page_config(layout="wide")
 load_dotenv() 
 
 map_box_api_key = os.environ.get("phila_crash_map_api_key")
+
+def create_legend_html(labels: list) -> str:
+    """Creates an HTML legend from a list dictionary of the format {'text': str, 'color': [r, g, b]}"""
+    labels = list(labels)
+    for label in labels:
+        assert label['color'] and label['text']
+        assert len(label['color']) in (3, 4)
+        label['color'] = ', '.join([str(c) for c in label['color']])
+    
+    legend_template = jinja2.Template('''
+    <style>
+      .legend {
+        width: 300px;
+        display: flex;
+        align-items: center;
+      }
+      .square {
+        height: 10px;
+        width: 10px;
+        border: 1px solid grey;
+        margin-right: 8px;
+      }
+    </style>
+    <h2>Legend</h2>
+    {% for label in labels %}
+    <div class='legend'>
+      <div class="square" style="background:rgba({{ label['color'] }})"></div>
+      <span>{{label['text']}}</span>
+    </div>
+    {% endfor %}
+    <br />
+    ''')
+    
+    return legend_template.render(labels=labels)
+
+def generate_legend_labels(df, filter_option):
+    # Define the dataframe column to be considered based on filter_option
+    column_mappings = {
+        'Total Collisions': 'CRN',
+        'Total Injured': 'INJURY_COUNT',
+        'Total Fatalities': 'FATAL_COUNT',
+        'Motorcycle Fatalities': 'MCYCLE_DEATH_COUNT',
+        'Pedestrian Fatalities': 'PED_DEATH_COUNT'
+    }
+
+    column_to_consider = column_mappings[filter_option]
+
+    # Calculate quantiles
+    min_val = df[column_to_consider].min()
+    max_val = df[column_to_consider].max()
+    
+    # Calculate bin edges based on the number of colors in the scheme
+    bin_edges = np.linspace(min_val, max_val, len(color_scheme) + 1)
+    
+    labels = []
+    min_val = df[column_to_consider].min()
+    for i in range(len(bin_edges) - 1):
+        labels.append({
+            "text": f"{bin_edges[i]:.2f} - {bin_edges[i+1]:.2f}",
+            "color": color_scheme[i]
+        })
+
+    return labels
+
+
+color_scheme = [
+    [0, 0, 4, 223],
+    [20, 11, 53, 239],
+    [58, 9, 99],
+    [96, 19, 110],
+    [133, 33, 107],
+    [169, 46, 94],
+    [203, 65, 73],
+    [230, 93, 47],
+    [247, 131, 17],
+    [252, 173, 18],
+    [245, 219, 75],
+    [252, 255, 164]
+]
 
 def render_map(df, mode='3D', zoom=9, tooltip_title='', radius=500, filename='demo.html'):
     # 1. Color Scheme 
@@ -89,6 +170,8 @@ def render_map(df, mode='3D', zoom=9, tooltip_title='', radius=500, filename='de
         }
     }
     
+    
+    
 
     # Render
     r = pdk.Deck(
@@ -158,7 +241,15 @@ def main():
         value=500  # This is the default value
     )
     
+
+    
     map_deck = render_map(df, mode=mode_option, zoom=9.75, tooltip_title=tooltip_title, radius=bin_size_option)
+    
+    # Generate and display the legend dynamically
+    labels = generate_legend_labels(df, filter_option)
+    legend_html = create_legend_html(labels)
+    st.markdown(legend_html, unsafe_allow_html=True)
+    
     
     st.pydeck_chart(map_deck)
     
