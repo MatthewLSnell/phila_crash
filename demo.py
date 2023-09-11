@@ -5,11 +5,14 @@ import os
 from dotenv import load_dotenv
 import streamlit as st 
 
+# Set the page to wide format
+st.set_page_config(layout="wide")
+
 load_dotenv() 
 
 map_box_api_key = os.environ.get("phila_crash_map_api_key")
 
-def render_map(df, mode='3D', zoom=9, tooltip_title='', filename='demo.html'):
+def render_map(df, mode='3D', zoom=9, tooltip_title='', radius=500, filename='demo.html'):
     # 1. Color Scheme 
     color_scheme = [
     [0, 0, 4, 223],
@@ -45,7 +48,8 @@ def render_map(df, mode='3D', zoom=9, tooltip_title='', filename='demo.html'):
     
     # Determine elevation range based on mode 
     elevation_range = [0, 150] if mode == '3D' else [0, 0]
-    pitch_value = 40.5 if mode == '3D' else 10
+    # pitch_value = 40.5 if mode == '3D' else 10
+    pitch_value = 60 if mode == '3D' else 10
 
     # Define a layer to display on a map
     layer = pdk.Layer(
@@ -58,7 +62,7 @@ def render_map(df, mode='3D', zoom=9, tooltip_title='', filename='demo.html'):
         elevation_range=elevation_range,
         extruded=True,
         coverage=1,
-        radius=300,
+        radius=radius,
         opacity=0.4,
         color_range=color_scheme,
         material={"ambientColor": [255, 255, 255], "shininess": 50, "lightSettings": lighting_effects}
@@ -66,8 +70,8 @@ def render_map(df, mode='3D', zoom=9, tooltip_title='', filename='demo.html'):
 
     # Set the viewport location
     view_state = pdk.ViewState(
-        longitude=-75.1652,
-        latitude=39.9526,
+        longitude=-75.1252,
+        latitude=39.9926,
         zoom=zoom,
         min_zoom=5,
         max_zoom=15,
@@ -79,7 +83,8 @@ def render_map(df, mode='3D', zoom=9, tooltip_title='', filename='demo.html'):
     tooltip = {
         "html": f"<b>{tooltip_title} :</b> {{elevationValue}}",
         "style": {
-            "backgroundColor": "steelblue",
+            # "backgroundColor": "steelblue",
+            "backgroundColor": "rgba(0, 0, 0, 0.7)",  # This sets the color to a transparent black
             "color": "white"
         }
     }
@@ -144,7 +149,16 @@ def main():
     
     mode_option = st.selectbox('Select Mode:', ('2D', '3D'))
     
-    map_deck = render_map(df, mode=mode_option, zoom=9.75, tooltip_title=tooltip_title)
+    # Slider for selecting bin size
+    bin_size_option = st.slider(
+        'Select Hexagon Bin Size (in meters):',
+        min_value=400,
+        max_value=700,
+        step=100,
+        value=500  # This is the default value
+    )
+    
+    map_deck = render_map(df, mode=mode_option, zoom=9.75, tooltip_title=tooltip_title, radius=bin_size_option)
     
     st.pydeck_chart(map_deck)
     
