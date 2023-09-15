@@ -1,4 +1,3 @@
-from json import tool
 import pydeck as pdk
 import pandas as pd
 import os
@@ -6,38 +5,15 @@ import numpy as np
 from dotenv import load_dotenv
 import streamlit as st 
 
+# Set the page to wide format
+st.set_page_config(layout="wide")
+
 load_dotenv() 
 
 map_box_api_key = os.environ.get("phila_crash_map_api_key")
 
-    # Define the dataframe column to be considered based on filter_option
-column_mappings = {
-        'Total Collisions': 'CRN',
-        'Total Injured': 'INJURY_COUNT',
-        'Total Fatalities': 'FATAL_COUNT',
-        'Motorcycle Fatalities': 'MCYCLE_DEATH_COUNT',
-        'Pedestrian Fatalities': 'PED_DEATH_COUNT'
-    }
 
-
-
-
-color_scheme = [
-    [0, 0, 4, 223],
-    [20, 11, 53, 239],
-    [58, 9, 99],
-    [96, 19, 110],
-    [133, 33, 107],
-    [169, 46, 94],
-    [203, 65, 73],
-    [230, 93, 47],
-    [247, 131, 17],
-    [252, 173, 18],
-    [245, 219, 75],
-    [252, 255, 164]
-]
-
-def render_map(df, mode='3D', zoom=9, tooltip_title='', filename='demo.html'):
+def render_map(df, mode='3D', zoom=9, tooltip_title='', radius=500, filename='demo.html'):
     # 1. Color Scheme 
     color_scheme = [
     [0, 0, 4, 223],
@@ -73,7 +49,8 @@ def render_map(df, mode='3D', zoom=9, tooltip_title='', filename='demo.html'):
     
     # Determine elevation range based on mode 
     elevation_range = [0, 150] if mode == '3D' else [0, 0]
-    pitch_value = 40.5 if mode == '3D' else 10
+    # pitch_value = 40.5 if mode == '3D' else 10
+    pitch_value = 60 if mode == '3D' else 10
 
     # Define a layer to display on a map
     layer = pdk.Layer(
@@ -86,7 +63,7 @@ def render_map(df, mode='3D', zoom=9, tooltip_title='', filename='demo.html'):
         elevation_range=elevation_range,
         extruded=True,
         coverage=1,
-        radius=300,
+        radius=radius,
         opacity=0.4,
         color_range=color_scheme,
         material={"ambientColor": [255, 255, 255], "shininess": 50, "lightSettings": lighting_effects}
@@ -95,7 +72,7 @@ def render_map(df, mode='3D', zoom=9, tooltip_title='', filename='demo.html'):
     # Set the viewport location
     view_state = pdk.ViewState(
         longitude=-75.1652,
-        latitude=39.9526,
+        latitude=39.9926,
         zoom=zoom,
         min_zoom=5,
         max_zoom=15,
@@ -107,7 +84,7 @@ def render_map(df, mode='3D', zoom=9, tooltip_title='', filename='demo.html'):
     tooltip = {
         "html": f"<b>{tooltip_title} :</b> {{elevationValue}}",
         "style": {
-            "backgroundColor": "steelblue",
+            "backgroundColor": "rgba(0, 0, 0, 0.7)",  # This sets the color to a transparent black
             "color": "white"
         }
     }
@@ -131,7 +108,6 @@ def main():
     st.title("Philadelphia Crash Map")
     
     df = pd.read_csv('data\PROCESSED_DATA\crash_data.csv')
-    print(f"Initial data shape: {df.shape}")
     
     # Add a selectbox (dropdown) for users to select a data filter
     filter_option = st.selectbox(
@@ -171,14 +147,23 @@ def main():
     elif filter_option == 'Pedestrian Fatalities':
         df = df.loc[(df['PED_DEATH_COUNT'] > 0)]
         
-    print(f"Filtered data shape for {filter_option}: {df.shape}")
-    print(f"Max value for {filter_option}: {df[column_mappings[filter_option]].max()}")
     
     df = df.dropna(subset=['DEC_LONG', 'DEC_LAT']) 
     
     mode_option = st.selectbox('Select Mode:', ('2D', '3D'))
     
     map_deck = render_map(df, mode=mode_option, zoom=9.75, tooltip_title=tooltip_title)
+    
+     # Slider for selecting bin size
+    bin_size_option = st.slider(
+        'Select Hexagon Bin Size (in meters):',
+        min_value=400,
+        max_value=700,
+        step=100,
+        value=500  # This is the default value
+    )
+    
+    map_deck = render_map(df, mode=mode_option, zoom=9.75, tooltip_title=tooltip_title, radius=bin_size_option)
     
     st.pydeck_chart(map_deck)
     
