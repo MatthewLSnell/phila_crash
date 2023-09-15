@@ -12,10 +12,7 @@ load_dotenv()
 
 map_box_api_key = os.environ.get("phila_crash_map_api_key")
 
-
-def render_map(df, mode='3D', zoom=9, tooltip_title='', radius=500, filename='demo.html'):
-    # 1. Color Scheme 
-    color_scheme = [
+color_scheme = [
     [0, 0, 4, 223],
     [20, 11, 53, 239],
     [58, 9, 99],
@@ -29,6 +26,30 @@ def render_map(df, mode='3D', zoom=9, tooltip_title='', radius=500, filename='de
     [245, 219, 75],
     [252, 255, 164]
 ]
+
+
+
+def create_color_legend():
+    # Create a legend with color ranges
+    legend_html = """
+    <div style="position: absolute; top: 40px; right: 50px; background-color: rgba(0, 0, 0, 0.7); padding: 5px 5px 0px 5px; border-radius: 5px; z-index: 999; color: white; font-size: 0.3em;">
+        <div style="display: flex; align-items: center; gap: 2px;">
+    """
+    
+    for color in color_scheme:
+        # Create a color block for each color in the scheme
+        legend_html += f'<div style="background-color: rgba{tuple(color)}; width: 20px; height: 10px;"></div>'
+    
+    legend_html += """
+        </div>
+        <p style="font-size: 2.2em; margin-bottom: 0;">Low <span style="float: right;">High</span></p>
+    </div>
+    """
+    return legend_html
+
+
+
+def render_map(df, mode='3D', zoom=9, tooltip_title='', radius=500, filename='demo.html'):
 
     # 2 Lighting Effects
     lighting_effects = {
@@ -104,11 +125,18 @@ def render_map(df, mode='3D', zoom=9, tooltip_title='', radius=500, filename='de
 
     return r
 
+@st.cache_data
+def load_and_preprocess_data():
+    df = pd.read_csv(os.path.join('data', 'PROCESSED_DATA', 'crash_data.csv'))
+    df = df.dropna(subset=['DEC_LONG', 'DEC_LAT'])
+    
+    return df
+
 def main():
-    st.title("Philadelphia Crash Map")
-    
-    df = pd.read_csv('data\PROCESSED_DATA\crash_data.csv')
-    
+    st.title("Mapping Philadelphia Motor Vehicle Crashes")
+
+    df = load_and_preprocess_data()
+
     # Add a selectbox (dropdown) for users to select a data filter
     filter_option = st.selectbox(
         'Filter Data By:',
@@ -120,7 +148,7 @@ def main():
             'Pedestrian Fatalities'
         )
     )
-    
+
     # Add mappings for tooltip_title based on filter_option
     tooltip_titles = {
         'Total Collisions': 'Total Collisions',
@@ -129,9 +157,9 @@ def main():
         'Motorcycle Fatalities': 'Motorcycle Fatalities',
         'Pedestrian Fatalities': 'Pedestrian Fatalities'
     }
-    
-    tooltip_title = tooltip_titles[filter_option] 
-    
+
+    tooltip_title = tooltip_titles[filter_option]
+
     if filter_option == 'Total Collisions':
         df = df.loc[(df['CRN'] > 0)]
         
@@ -146,26 +174,27 @@ def main():
         
     elif filter_option == 'Pedestrian Fatalities':
         df = df.loc[(df['PED_DEATH_COUNT'] > 0)]
-        
-    
-    df = df.dropna(subset=['DEC_LONG', 'DEC_LAT']) 
-    
+
     mode_option = st.selectbox('Select Mode:', ('2D', '3D'))
-    
-    map_deck = render_map(df, mode=mode_option, zoom=9.75, tooltip_title=tooltip_title)
-    
-     # Slider for selecting bin size
+
+    # Slider for selecting bin size
     bin_size_option = st.slider(
         'Select Hexagon Bin Size (in meters):',
-        min_value=400,
+        min_value=500,
         max_value=700,
         step=100,
         value=500  # This is the default value
     )
-    
+
+    # Display the legend here
+    legend_html = create_color_legend()
+    st.markdown(legend_html, unsafe_allow_html=True)
+
+    # Render and display the map
     map_deck = render_map(df, mode=mode_option, zoom=9.75, tooltip_title=tooltip_title, radius=bin_size_option)
-    
     st.pydeck_chart(map_deck)
+
     
 if __name__ == '__main__':
-    main()
+    with st.spinner('Map Loading...'):
+        main()
