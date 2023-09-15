@@ -6,6 +6,7 @@ import numpy as np
 from dotenv import load_dotenv
 import streamlit as st 
 import jinja2
+import matplotlib.pyplot as plt
 
 # Set the page to wide format
 st.set_page_config(layout="wide")
@@ -13,6 +14,15 @@ st.set_page_config(layout="wide")
 load_dotenv() 
 
 map_box_api_key = os.environ.get("phila_crash_map_api_key")
+
+    # Define the dataframe column to be considered based on filter_option
+column_mappings = {
+        'Total Collisions': 'CRN',
+        'Total Injured': 'INJURY_COUNT',
+        'Total Fatalities': 'FATAL_COUNT',
+        'Motorcycle Fatalities': 'MCYCLE_DEATH_COUNT',
+        'Pedestrian Fatalities': 'PED_DEATH_COUNT'
+    }
 
 def create_legend_html(labels: list) -> str:
     """Creates an HTML legend from a list dictionary of the format {'text': str, 'color': [r, g, b]}"""
@@ -48,34 +58,76 @@ def create_legend_html(labels: list) -> str:
     
     return legend_template.render(labels=labels)
 
-def generate_legend_labels(df, filter_option):
-    # Define the dataframe column to be considered based on filter_option
-    column_mappings = {
-        'Total Collisions': 'CRN',
-        'Total Injured': 'INJURY_COUNT',
-        'Total Fatalities': 'FATAL_COUNT',
-        'Motorcycle Fatalities': 'MCYCLE_DEATH_COUNT',
-        'Pedestrian Fatalities': 'PED_DEATH_COUNT'
-    }
+# def generate_legend_labels(df, filter_option):
+#     # Define the dataframe column to be considered based on filter_option
+#     column_mappings = {
+#         'Total Collisions': 'CRN',
+#         'Total Injured': 'INJURY_COUNT',
+#         'Total Fatalities': 'FATAL_COUNT',
+#         'Motorcycle Fatalities': 'MCYCLE_DEATH_COUNT',
+#         'Pedestrian Fatalities': 'PED_DEATH_COUNT'
+#     }
 
-    column_to_consider = column_mappings[filter_option]
+#     column_to_consider = column_mappings[filter_option]
 
-    # Calculate quantiles
-    min_val = df[column_to_consider].min()
-    max_val = df[column_to_consider].max()
+#     # Calculate quantiles
+#     min_val = df[column_to_consider].min()
+#     max_val = df[column_to_consider].max()
     
+#     # Calculate bin edges based on the number of colors in the scheme
+#     bin_edges = np.linspace(min_val, max_val, len(color_scheme) + 1)
+    
+#     labels = []
+#     min_val = df[column_to_consider].min()
+#     for i in range(len(bin_edges) - 1):
+#         labels.append({
+#             "text": f"{bin_edges[i]:.2f} - {bin_edges[i+1]:.2f}",
+#             "color": color_scheme[i]
+#         })
+
+#     return labels
+
+def generate_legend_labels(min_agg_val, max_agg_val):
     # Calculate bin edges based on the number of colors in the scheme
-    bin_edges = np.linspace(min_val, max_val, len(color_scheme) + 1)
+    bin_edges = np.linspace(min_agg_val, max_agg_val, len(color_scheme) + 1)
     
     labels = []
-    min_val = df[column_to_consider].min()
     for i in range(len(bin_edges) - 1):
+        print(f"Bin edge {i}: {bin_edges[i]:.2f}")
         labels.append({
             "text": f"{bin_edges[i]:.2f} - {bin_edges[i+1]:.2f}",
             "color": color_scheme[i]
         })
-
+        
     return labels
+
+def calculate_hexbin_aggregates(df, radius, filter_option):
+    # Convert latitude and longitude to meters 
+    # Using an approximation: 1 degree is around 111km
+    df['x_m'] = df['DEC_LONG'] * 111000 * np.cos(df['DEC_LAT'])
+    df['y_m'] = df['DEC_LAT'] * 111000
+
+    if filter_option == 'Total Collisions':
+        # For counting, set C to an array of ones.
+        C_values = np.ones(len(df))
+    else:
+        C_values = df[column_mappings[filter_option]]
+    
+    # Calculate hexbin
+    hb = plt.hexbin(df['x_m'], df['y_m'], gridsize=radius, reduce_C_function=np.sum, C=C_values)
+    
+    # Close the matplotlib plot window, as we only need the data
+    plt.close()  
+    
+    min_agg_val, max_agg_val = hb.get_array().min(), hb.get_array().max()
+    print(f"Min aggregated value: {min_agg_val}")
+    print(f"Max aggregated value: {max_agg_val}")
+
+    # Get min and max bin count values
+    min_agg_val, max_agg_val = hb.get_array().min(), hb.get_array().max()
+
+    return min_agg_val, max_agg_val
+
 
 
 color_scheme = [
@@ -189,6 +241,7 @@ def main():
     st.title("Philadelphia Crash Map")
     
     df = pd.read_csv('data\PROCESSED_DATA\crash_data.csv')
+    print(f"Initial data shape: {df.shape}")
     
     # Add a selectbox (dropdown) for users to select a data filter
     filter_option = st.selectbox(
@@ -227,6 +280,9 @@ def main():
         
     elif filter_option == 'Pedestrian Fatalities':
         df = df.loc[(df['PED_DEATH_COUNT'] > 0)]
+        
+    print(f"Filtered data shape for {filter_option}: {df.shape}")
+    print(f"Max value for {filter_option}: {df[column_mappings[filter_option]].max()}")
     
     df = df.dropna(subset=['DEC_LONG', 'DEC_LAT']) 
     
@@ -246,7 +302,11 @@ def main():
     map_deck = render_map(df, mode=mode_option, zoom=9.75, tooltip_title=tooltip_title, radius=bin_size_option)
     
     # Generate and display the legend dynamically
-    labels = generate_legend_labels(df, filter_option)
+    # labels = generate_legend_labels(df, filter_option)
+    min_agg_val, max_agg_val = calculate_hexbin_aggregates(df, bin_size_option, filter_option)
+    print(f"Returned min aggregated value: {min_agg_val}")
+    print(f"Returned max aggregated value: {max_agg_val}")
+    labels = generate_legend_labels(min_agg_val, max_agg_val)
     legend_html = create_legend_html(labels)
     st.markdown(legend_html, unsafe_allow_html=True)
     
