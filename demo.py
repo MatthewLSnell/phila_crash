@@ -5,11 +5,6 @@ import os
 import numpy as np
 from dotenv import load_dotenv
 import streamlit as st 
-import jinja2
-import matplotlib.pyplot as plt
-
-# Set the page to wide format
-st.set_page_config(layout="wide")
 
 load_dotenv() 
 
@@ -145,7 +140,7 @@ color_scheme = [
     [252, 255, 164]
 ]
 
-def render_map(df, mode='3D', zoom=9, tooltip_title='', radius=500, filename='demo.html'):
+def render_map(df, mode='3D', zoom=9, tooltip_title='', filename='demo.html'):
     # 1. Color Scheme 
     color_scheme = [
     [0, 0, 4, 223],
@@ -181,8 +176,7 @@ def render_map(df, mode='3D', zoom=9, tooltip_title='', radius=500, filename='de
     
     # Determine elevation range based on mode 
     elevation_range = [0, 150] if mode == '3D' else [0, 0]
-    # pitch_value = 40.5 if mode == '3D' else 10
-    pitch_value = 60 if mode == '3D' else 10
+    pitch_value = 40.5 if mode == '3D' else 10
 
     # Define a layer to display on a map
     layer = pdk.Layer(
@@ -195,7 +189,7 @@ def render_map(df, mode='3D', zoom=9, tooltip_title='', radius=500, filename='de
         elevation_range=elevation_range,
         extruded=True,
         coverage=1,
-        radius=radius,
+        radius=300,
         opacity=0.4,
         color_range=color_scheme,
         material={"ambientColor": [255, 255, 255], "shininess": 50, "lightSettings": lighting_effects}
@@ -203,8 +197,8 @@ def render_map(df, mode='3D', zoom=9, tooltip_title='', radius=500, filename='de
 
     # Set the viewport location
     view_state = pdk.ViewState(
-        longitude=-75.1252,
-        latitude=39.9926,
+        longitude=-75.1652,
+        latitude=39.9526,
         zoom=zoom,
         min_zoom=5,
         max_zoom=15,
@@ -216,8 +210,7 @@ def render_map(df, mode='3D', zoom=9, tooltip_title='', radius=500, filename='de
     tooltip = {
         "html": f"<b>{tooltip_title} :</b> {{elevationValue}}",
         "style": {
-            # "backgroundColor": "steelblue",
-            "backgroundColor": "rgba(0, 0, 0, 0.7)",  # This sets the color to a transparent black
+            "backgroundColor": "steelblue",
             "color": "white"
         }
     }
@@ -288,28 +281,7 @@ def main():
     
     mode_option = st.selectbox('Select Mode:', ('2D', '3D'))
     
-    # Slider for selecting bin size
-    bin_size_option = st.slider(
-        'Select Hexagon Bin Size (in meters):',
-        min_value=400,
-        max_value=700,
-        step=100,
-        value=500  # This is the default value
-    )
-    
-
-    
-    map_deck = render_map(df, mode=mode_option, zoom=9.75, tooltip_title=tooltip_title, radius=bin_size_option)
-    
-    # Generate and display the legend dynamically
-    # labels = generate_legend_labels(df, filter_option)
-    min_agg_val, max_agg_val = calculate_hexbin_aggregates(df, bin_size_option, filter_option)
-    print(f"Returned min aggregated value: {min_agg_val}")
-    print(f"Returned max aggregated value: {max_agg_val}")
-    labels = generate_legend_labels(min_agg_val, max_agg_val)
-    legend_html = create_legend_html(labels)
-    st.markdown(legend_html, unsafe_allow_html=True)
-    
+    map_deck = render_map(df, mode=mode_option, zoom=9.75, tooltip_title=tooltip_title)
     
     st.pydeck_chart(map_deck)
     
