@@ -12,6 +12,7 @@ load_dotenv()
 
 map_box_api_key = os.environ.get("phila_crash_map_api_key")
 
+# Define a color scheme for the map
 color_scheme = [
     [0, 0, 4, 223],
     [20, 11, 53, 239],
@@ -132,6 +133,13 @@ def load_and_preprocess_data():
     
     return df
 
+@st.cache_data
+def load_and_preprocess_data():
+    df = pd.read_csv(os.path.join('data', 'PROCESSED_DATA', 'crash_data.csv'))
+    df = df.dropna(subset=['DEC_LONG', 'DEC_LAT'])
+    
+    return df
+
 def main():
     st.markdown("<h1 style='text-align: center; color: white;'>Mapping Philadelphia Motor Vehicle Crashes</h1>", unsafe_allow_html=True)
 
@@ -157,6 +165,9 @@ def main():
         'Motorcycle Fatalities': 'Motorcycle Fatalities',
         'Pedestrian Fatalities': 'Pedestrian Fatalities'
     }
+
+    tooltip_title = tooltip_titles[filter_option]
+
 
     tooltip_title = tooltip_titles[filter_option]
 
@@ -196,6 +207,4 @@ def main():
 
     
 if __name__ == '__main__':
-    with st.spinner('Map Loading...'):
-        st.cache_data(main)
-        main()
+    main()
