@@ -12,7 +12,6 @@ load_dotenv()
 
 map_box_api_key = os.environ.get("phila_crash_map_api_key")
 
-# Define a color scheme for the map
 color_scheme = [
     [0, 0, 4, 223],
     [20, 11, 53, 239],
@@ -133,15 +132,8 @@ def load_and_preprocess_data():
     
     return df
 
-@st.cache_data
-def load_and_preprocess_data():
-    df = pd.read_csv(os.path.join('data', 'PROCESSED_DATA', 'crash_data.csv'))
-    df = df.dropna(subset=['DEC_LONG', 'DEC_LAT'])
-    
-    return df
-
 def main():
-    st.markdown("<h1 style='text-align: center; color: white;'>Mapping Philadelphia Motor Vehicle Crashes</h1>", unsafe_allow_html=True)
+    st.title("Mapping Philadelphia Motor Vehicle Crashes")
 
     df = load_and_preprocess_data()
 
@@ -168,9 +160,6 @@ def main():
 
     tooltip_title = tooltip_titles[filter_option]
 
-
-    tooltip_title = tooltip_titles[filter_option]
-
     if filter_option == 'Total Collisions':
         df = df.loc[(df['CRN'] > 0)]
         
@@ -186,10 +175,10 @@ def main():
     elif filter_option == 'Pedestrian Fatalities':
         df = df.loc[(df['PED_DEATH_COUNT'] > 0)]
 
-    mode_option = st.sidebar.selectbox('Select Mode:', ('2D', '3D'))
+    mode_option = st.selectbox('Select Mode:', ('2D', '3D'))
 
     # Slider for selecting bin size
-    bin_size_option = st.sidebar.slider(
+    bin_size_option = st.slider(
         'Select Hexagon Bin Size (in meters):',
         min_value=500,
         max_value=700,
@@ -207,4 +196,5 @@ def main():
 
     
 if __name__ == '__main__':
-    main()
+    with st.spinner('Map Loading...'):
+        main()
