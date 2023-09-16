@@ -175,10 +175,10 @@ def main():
     elif filter_option == 'Pedestrian Fatalities':
         df = df.loc[(df['PED_DEATH_COUNT'] > 0)]
 
-    mode_option = st.selectbox('Select Mode:', ('2D', '3D'))
+    mode_option = st.sidebar.selectbox('Select Mode:', ('2D', '3D'))
 
     # Slider for selecting bin size
-    bin_size_option = st.slider(
+    bin_size_option = st.sidebar.slider(
         'Select Hexagon Bin Size (in meters):',
         min_value=500,
         max_value=700,
