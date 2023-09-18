@@ -4,9 +4,12 @@ import os
 import numpy as np
 from dotenv import load_dotenv
 import streamlit as st 
+from st_pages import show_pages_from_config
+
+show_pages_from_config(".streamlit\pages.toml")
 
 # Set the page to wide format
-st.set_page_config(layout="wide")
+# st.set_page_config(layout="wide")
 
 load_dotenv() 
 
@@ -49,7 +52,7 @@ def create_color_legend():
 
 
 
-def render_map(df, mode='3D', zoom=9, tooltip_title='', radius=500, filename='demo.html'):
+def render_map(df, mode='3D', zoom=9, tooltip_title='', radius=500, filename='demo.html', opacity_option=0.3):
 
     # 2 Lighting Effects
     lighting_effects = {
@@ -85,7 +88,7 @@ def render_map(df, mode='3D', zoom=9, tooltip_title='', radius=500, filename='de
         extruded=True,
         coverage=1,
         radius=radius,
-        opacity=1.0,
+        opacity=opacity_option,
         color_range=color_scheme,
         material={"ambientColor": [255, 255, 255], "shininess": 50, "lightSettings": lighting_effects}
     )
@@ -126,7 +129,8 @@ def render_map(df, mode='3D', zoom=9, tooltip_title='', radius=500, filename='de
 
 @st.cache_data
 def load_and_preprocess_data():
-    df = pd.read_csv(os.path.join('data', 'PROCESSED_DATA', 'crash_data.csv'))
+    # df = pd.read_csv(os.path.join('data', 'PROCESSED_DATA', 'crash_data.csv'))
+    df = pd.read_csv('..\data\PROCESSED_DATA\crash_data.csv')
     df = df.dropna(subset=['DEC_LONG', 'DEC_LAT'])
     
     return df
@@ -199,13 +203,25 @@ def main():
         value=300,  # This sets the default value to 100
         step=100  # This will make the slider increment by 50
     )
+    
+    opacity_option_percentage = st.sidebar.slider(
+        'Select Hexagon Opacity (%):',
+        min_value=30,  # minimum opacity in percentage
+        max_value=100,  # maximum opacity in percentage
+        value=30,  # default opacity in percentage
+        step=10  # step increment
+    )
+    
+    # Convert the percentage value back to a decimal for use in the map rendering
+    opacity_option_decimal = opacity_option_percentage / 100
+
 
     # Display the legend here
     legend_html = create_color_legend()
     st.markdown(legend_html, unsafe_allow_html=True)
 
     # Render and display the map
-    map_deck = render_map(df, mode=mode_option, zoom=9.75, tooltip_title=tooltip_title, radius=bin_size_option)
+    map_deck = render_map(df, mode=mode_option, zoom=9.75, tooltip_title=tooltip_title, radius=bin_size_option, opacity_option=opacity_option_decimal)
     st.pydeck_chart(map_deck)
 
     
