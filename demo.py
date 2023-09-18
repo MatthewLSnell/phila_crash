@@ -85,7 +85,7 @@ def render_map(df, mode='3D', zoom=9, tooltip_title='', radius=500, filename='de
         extruded=True,
         coverage=1,
         radius=radius,
-        opacity=0.6,
+        opacity=0.4,
         color_range=color_scheme,
         material={"ambientColor": [255, 255, 255], "shininess": 50, "lightSettings": lighting_effects}
     )
@@ -133,7 +133,21 @@ def load_and_preprocess_data():
     return df
 
 def main():
-    st.title("Mapping Philadelphia Motor Vehicle Crashes")
+    st.markdown("""
+    <style>
+        .big-font {
+            font-size:50px !important;
+            text-align:center;
+        }
+    </style>
+    """, 
+    unsafe_allow_html=True
+    )
+
+    st.markdown(
+        f'<div class="big-font">Mapping Philadelphia Motor Vehicle Crashes</div>', 
+        unsafe_allow_html=True
+    )
 
     df = load_and_preprocess_data()
 
@@ -180,10 +194,10 @@ def main():
     # Slider for selecting bin size
     bin_size_option = st.sidebar.slider(
         'Select Hexagon Bin Size (in meters):',
-        min_value=500,
-        max_value=700,
+        min_value=100,
+        max_value=1000,
         step=100,
-        value=500  # This is the default value
+        value=100  # This is the default value
     )
 
     # Display the legend here
