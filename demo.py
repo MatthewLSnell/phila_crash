@@ -133,6 +133,9 @@ def load_and_preprocess_data():
     return df
 
 def main():
+    
+    zoom_placeholder = st.empty()
+    
     st.markdown("""
     <style>
         .big-font {
@@ -207,6 +210,33 @@ def main():
     # Render and display the map
     map_deck = render_map(df, mode=mode_option, zoom=9.75, tooltip_title=tooltip_title, radius=bin_size_option)
     st.pydeck_chart(map_deck)
+    
+    # This widget is hidden and will hold the current zoom level
+    current_zoom = zoom_placeholder.text_input("Zoom Level", value="9.75", key="zoom-level")
+    
+    # Add the JS script
+    zoom_script = """
+    <script>
+        const deckgl = document.querySelector('#deckgl-overlay');
+        if(deckgl) {
+            deckgl.addEventListener('wheel', function(e) {
+                setTimeout(() => {
+                    const zoom = deckgl.deck.viewState.zoom;
+                    const zoomInput = document.querySelector('#zoom-level');
+                    zoomInput.style.display = 'block';  // Temporarily display the input to update it
+                    zoomInput.value = zoom;
+                    document.querySelector('#zoom-level').dispatchEvent(new Event('change'));
+                }, 500);  // we wait a little for the zoom action to complete
+            });
+        }
+    </script>
+    """
+    st.markdown(zoom_script, unsafe_allow_html=True)
+    
+        # Now you can use current_zoom for further logic if needed
+    if current_zoom:
+        zoom_value = float(current_zoom)
+        # Use the zoom_value for other calculations/logic as needed
 
     
 if __name__ == '__main__':
