@@ -85,7 +85,7 @@ def render_map(df, mode='3D', zoom=9, tooltip_title='', radius=500, filename='de
         extruded=True,
         coverage=1,
         radius=radius,
-        opacity=0.4,
+        opacity=1.0,
         color_range=color_scheme,
         material={"ambientColor": [255, 255, 255], "shininess": 50, "lightSettings": lighting_effects}
     )
@@ -109,7 +109,6 @@ def render_map(df, mode='3D', zoom=9, tooltip_title='', radius=500, filename='de
             "color": "white"
         }
     }
-    
     
     
 
@@ -190,14 +189,15 @@ def main():
         df = df.loc[(df['PED_DEATH_COUNT'] > 0)]
 
     mode_option = st.sidebar.selectbox('Select Mode:', ('2D', '3D'))
+    
 
     # Slider for selecting bin size
     bin_size_option = st.sidebar.slider(
-        'Select Hexagon Bin Size (in meters):',
+    'Select Hexagon Bin Size (in meters):',
         min_value=100,
         max_value=1000,
-        step=100,
-        value=100  # This is the default value
+        value=300,  # This sets the default value to 100
+        step=100  # This will make the slider increment by 50
     )
 
     # Display the legend here
