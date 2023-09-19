@@ -1,9 +1,9 @@
 [[pages]]
-path = "my_app\mapping.py"
+path = "my_app/mapping.py"
 name = "Interactive Crash Heatmap"
 icon = ":world map"
 
 [[pages]]
-path = "my_app\pages\page_2_about.py"
+path = "my_app/pages/page_2_about.py"
 name = "About"
 icon = ":white question mark"

@@ -6,10 +6,9 @@ from dotenv import load_dotenv
 import streamlit as st 
 from st_pages import show_pages_from_config
 
-show_pages_from_config(".streamlit\pages.toml")
 
 # Set the page to wide format
-# st.set_page_config(layout="wide")
+st.set_page_config(layout="wide")
 
 load_dotenv() 
 
@@ -129,32 +128,21 @@ def render_map(df, mode='3D', zoom=9, tooltip_title='', radius=500, filename='de
 
 @st.cache_data
 def load_and_preprocess_data():
-    # df = pd.read_csv(os.path.join('data', 'PROCESSED_DATA', 'crash_data.csv'))
-    df = pd.read_csv('..\data\PROCESSED_DATA\crash_data.csv')
+    # df = pd.read_csv('../data/PROCESSED_DATA/crash_data.csv')
+    df = pd.read_parquet('../data/PROCESSED_DATA/crash_data.parquet')
     df = df.dropna(subset=['DEC_LONG', 'DEC_LAT'])
     
     return df
 
-def main():
-    st.markdown("""
-    <style>
-        .big-font {
-            font-size:50px !important;
-            text-align:center;
-        }
-    </style>
-    """, 
-    unsafe_allow_html=True
-    )
+def interactive_heatmap():
 
-    st.markdown(
-        f'<div class="big-font">Mapping Philadelphia Motor Vehicle Crashes</div>', 
-        unsafe_allow_html=True
-    )
+    st.markdown("<h1 style='text-align: center; color: white;'>Mapping Philadelphia Motor Vehicle Crashes</h1>", unsafe_allow_html=True)
+    st.markdown("<h6 style='text-align: center; color: white;'>This interactive map showcases the motor vehicle crashes that have occurred in Philadelphia from 2010 to 2021. The map is interactive and allows users to filter the data by total collisions, total injuries, total fatalities, motorcycle fatalities, and pedestrian fatalities. The map is rendered using the PyDeck library and the data is sourced from the City of Philadelphia's Open Data Portal.</h6>", unsafe_allow_html=True)
 
     df = load_and_preprocess_data()
 
     # Add a selectbox (dropdown) for users to select a data filter
+    st.sidebar.header("Map Filters")
     filter_option = st.sidebar.selectbox(
         'Filter Data By:',
         (
@@ -194,7 +182,8 @@ def main():
 
     mode_option = st.sidebar.selectbox('Select Mode:', ('2D', '3D'))
     
-
+    st.sidebar.header("Map Appearance")
+    
     # Slider for selecting bin size
     bin_size_option = st.sidebar.slider(
     'Select Hexagon Bin Size (in meters):',
@@ -208,7 +197,7 @@ def main():
         'Select Hexagon Opacity (%):',
         min_value=30,  # minimum opacity in percentage
         max_value=100,  # maximum opacity in percentage
-        value=30,  # default opacity in percentage
+        value=50,  # default opacity in percentage
         step=10  # step increment
     )
     
@@ -221,10 +210,12 @@ def main():
     st.markdown(legend_html, unsafe_allow_html=True)
 
     # Render and display the map
-    map_deck = render_map(df, mode=mode_option, zoom=9.75, tooltip_title=tooltip_title, radius=bin_size_option, opacity_option=opacity_option_decimal)
+    map_deck = render_map(df, mode=mode_option, zoom=9.95, tooltip_title=tooltip_title, radius=bin_size_option, opacity_option=opacity_option_decimal)
     st.pydeck_chart(map_deck)
 
     
 if __name__ == '__main__':
     with st.spinner('Map Loading...'):
-        main()
+        interactive_heatmap()
+
+
