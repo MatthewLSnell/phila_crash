@@ -18,16 +18,24 @@ This project showcases an interactive heatmap of motor vehicle crashes in Philad
 
 ## Getting Started
 
-### Prerequisites
+### Installation
 
-1. Python 3.x
-2. Streamlit
-3. PyDeck
-4. Pandas
-5. dotenv
+1. Clone this repository:
+    ```bash
+    git clone <repository-url>
+    ```
 
-1. Clone this repository or copy the code to a Python file.
-2. Run the Streamlit application using:
+2. Navigate to the project directory:
+    ```bash
+    cd <repository-name>
+    ```
+
+3. Install the required packages using:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+4. Run the Streamlit application using the provided command (replace with your specific command if different).
 
 Your default web browser should open, displaying the interactive heatmap.
 
