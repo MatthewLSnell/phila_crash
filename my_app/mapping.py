@@ -217,7 +217,7 @@ def interactive_heatmap():
     elif filter_option == "Pedestrian Fatalities":
         df = df.loc[(df["PED_DEATH_COUNT"] > 0)]
 
-    mode_option = st.sidebar.selectbox("Select Mode:", ("2D", "3D"))
+    mode_option = st.sidebar.selectbox("Select Mode:", ("3D", "2D"))
 
     st.sidebar.header("Map Appearance")
 
