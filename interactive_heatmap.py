@@ -154,7 +154,7 @@ def render_map(
 @st.cache_data
 def load_and_preprocess_data():
     """Loads and preprocesses the crash data."""
-    df = pd.read_parquet("../data/crash_data.parquet")
+    df = pd.read_parquet("data/crash_data.parquet")
     df = df.dropna(subset=["DEC_LONG", "DEC_LAT"])
 
     return df
