@@ -26,39 +26,8 @@ This project showcases an interactive heatmap of motor vehicle crashes in Philad
 4. Pandas
 5. dotenv
 
-You can install the required libraries using:
-
-\```bash
-pip install streamlit pydeck pandas python-dotenv
-\```
-
-### Setting up
-
-1. Clone the repository:
-
-\```bash
-git clone <repository-link>
-\```
-
-2. Navigate to the project directory:
-
-\```bash
-cd <directory-name>
-\```
-
-3. Create a `.env` file in the root directory and add your Mapbox API key:
-
-\```
-phila_crash_map_api_key=YOUR_MAPBOX_API_KEY
-\```
-
-### Running the App
-
-From the project directory, run:
-
-\```bash
-streamlit run <script-name>.py
-\```
+1. Clone this repository or copy the code to a Python file.
+2. Run the Streamlit application using:
 
 Your default web browser should open, displaying the interactive heatmap.
 
