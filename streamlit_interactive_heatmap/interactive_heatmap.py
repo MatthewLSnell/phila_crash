@@ -2,7 +2,6 @@
 import pydeck as pdk
 import pandas as pd
 import os
-import numpy as np
 from dotenv import load_dotenv
 import streamlit as st
 
