@@ -60,7 +60,7 @@ def render_map(
     zoom: int =9,
     tooltip_title: str="",
     radius: int =500,
-    filename: str ="demo.html",
+    filename: str ="interactive_heatmap.html",
     opacity_option: float = 0.3,
 ) -> pdk.Deck:
     """Renders the heatmap using the PyDeck library.
