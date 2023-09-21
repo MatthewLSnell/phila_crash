@@ -160,6 +160,24 @@ def load_and_preprocess_data():
 
     return df
 
+def about_section():
+    """Displays the about section in the sidebar."""
+    st.sidebar.header("About")
+    about_content = """
+        <style>
+            .small-font {
+                font-size: 0.7em;
+            }
+        </style>
+        <div class="small-font">
+            To explore the map in depth, you can:<br>
+            1. Use the zoom in/out buttons.<br>
+            2. Click and drag to move around.<br>
+            3. Hold the SHIFT key and drag the mouse to adjust the map pitch.
+        </div>
+    """
+    st.sidebar.markdown(about_content, unsafe_allow_html=True)
+
 
 def interactive_heatmap():
     """
@@ -190,6 +208,8 @@ def interactive_heatmap():
             "Pedestrian Fatalities",
         ),
     )
+    
+    st.sidebar.markdown("---")  # Add separator
 
     # Add mappings for tooltip_title based on filter_option
     tooltip_titles = {
@@ -240,6 +260,10 @@ def interactive_heatmap():
 
     # Convert the percentage value back to a decimal for use in the map rendering
     opacity_option_decimal = opacity_option_percentage / 100
+    
+    st.sidebar.markdown("---")  # Add separator
+    
+    about_section()
 
     # Display the legend here
     legend_html = create_color_legend()
