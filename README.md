@@ -33,7 +33,7 @@ Your default web browser should open, displaying the interactive heatmap.
 
 ## Data Source
 
-The crash data is sourced from the Pennsylvania Department of Transporation Open Portal. [Mapping Philadelphia Motor Vehicle Crashes - Interactive Map](https://pennshare.maps.arcgis.com/apps/webappviewer/index.html?id=8fdbf046e36e41649bbfd9d7dd7c7e7e)
+[The crash data is sourced from the Pennsylvania Department of Transporation Open Portal](https://pennshare.maps.arcgis.com/apps/webappviewer/index.html?id=8fdbf046e36e41649bbfd9d7dd7c7e7e)
 
 
 ## Contributing
