@@ -35,7 +35,7 @@ This project showcases an interactive heatmap of motor vehicle crashes in Philad
     pip install -r requirements.txt
     ```
 
-4. Run the Streamlit application using the provided command (replace with your specific command if different).
+4. Run the Streamlit application using the provided command (streamlilt run interactive_heatmap).
 
 Your default web browser should open, displaying the interactive heatmap.
 
