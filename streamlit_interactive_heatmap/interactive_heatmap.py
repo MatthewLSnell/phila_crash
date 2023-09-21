@@ -190,7 +190,7 @@ def interactive_heatmap():
         unsafe_allow_html=True,
     )
     st.markdown(
-        "<h6 style='text-align: center; color: white;'>This interactive map showcases the motor vehicle crashes that have occurred in Philadelphia from 2010 to 2021. The map is interactive and allows users to filter the data by total collisions, total injuries, total fatalities, motorcycle fatalities, and pedestrian fatalities. The map is rendered using the PyDeck library and the data is sourced from the City of Philadelphia's Open Data Portal.</h6>",
+        "<h6 style='text-align: center; color: white;'>This interactive map showcases the motor vehicle crashes that have occurred in Philadelphia from 2010 to 2021. The map is interactive and allows users to filter the data by total collisions, total injuries, total fatalities, motorcycle fatalities, and pedestrian fatalities. The map is rendered using the PyDeck library and the data is sourced from Pennsylvania's Department of Transportation.</h6>",
         unsafe_allow_html=True,
     )
 
