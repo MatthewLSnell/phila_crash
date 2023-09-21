@@ -2,7 +2,7 @@
 
 This project showcases an interactive heatmap of motor vehicle crashes in Philadelphia from 2010 to 2021. Users can filter and explore data based on various criteria, such as total collisions, total injuries, motorcycle fatalities, and more. The visualization leverages the PyDeck library, and data is sourced from the City of Philadelphia's Open Data Portal.
 
-![Sample Image](sample_image.png)  <!-- Include a screenshot of the heatmap for better visualization -->
+![Sample Image](https://github.com/MatthewLSnell/phila_crash/blob/main/Interactive%20Heatmap%20Screenshot.png))  <!-- Include a screenshot of the heatmap for better visualization -->
 
 ## Features
 
